@@ -4,6 +4,7 @@
 #include "ultra64.h"
 #include "eztr_api.h"
 
+/*
 EZTR_ON_INIT void replace_msgs() {
     EZTR_Basic_ReplaceText(
         0x1FA4,
@@ -18,3 +19,4 @@ EZTR_ON_INIT void replace_msgs() {
         NULL
     );
 }
+*/
