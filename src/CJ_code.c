@@ -10,95 +10,61 @@
 #include "eztr_api.h"
 #include "anims/gCJSkel_ocarinaGcj_ocarina_startAnim.h"
 #include "anims/gCJSkel_ocarinaGcj_ocarina_swingAnim.h"
+#include "playermodelmanager_api.h"
 
-RECOMP_IMPORT("*", int recomp_printf(const char* fmt, ...));
-
-extern Gfx* gPlayerRightHandOpenDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerRightHandClosedDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerRightHandBowDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerRightHandInstrumentDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerRightHandHookshotDLs[2 * PLAYER_FORM_MAX];
-
-extern Gfx* gPlayerLeftHandOpenDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerLeftHandClosedDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerLeftHandTwoHandSwordDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerLeftHandOneHandSwordDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerLeftHandBottleDLs[2 * PLAYER_FORM_MAX];
-extern Gfx* gPlayerWaistDLs[2 * PLAYER_FORM_MAX];
-
-extern Gfx* sPlayerFirstPersonLeftHandDLs[PLAYER_FORM_MAX];
-extern Gfx* sPlayerFirstPersonLeftForearmDLs[PLAYER_FORM_MAX];
-extern Gfx* sPlayerFirstPersonRightShoulderDLs[PLAYER_FORM_MAX];
-extern Gfx* sPlayerFirstPersonRightHandDLs[PLAYER_FORM_MAX];
-extern Gfx* sPlayerFirstPersonRightHandHookshotDLs[PLAYER_FORM_MAX];
-
-extern Gfx* gLinkHumanGildedSwordHandleDL[];
-extern Gfx* gLinkHumanGildedSwordBladeDL[];
-
-extern Gfx* gPlayerRightHandBowDLs[2 * PLAYER_FORM_MAX];
-
-extern Gfx* gLinkHumanMirrorShieldDL[];
-extern Gfx* gLinkHumanHerosShieldDL[];
-extern Gfx* gKokiriSwordDL[];
-extern Gfx* gRazorSwordDL[];
-extern Gfx* gLinkHumanBowDL[];
-extern Gfx* gLinkHumanHookshotDL[];
-
-extern Gfx* D_801C018C[];
+extern PlayerAgeProperties sPlayerAgeProperties[];
+extern LinkAnimationHeader gPlayerAnim_link_normal_okarina_start[];
+extern LinkAnimationHeader gPlayerAnim_link_normal_okarina_swing[];
+extern Input *sPlayerControlInput;
 
 extern Gfx gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0[];
 extern Gfx gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0[];
 
-Gfx gCJRightHandHoldingMirrorShieldDL[] = {
-    gsSPDisplayList(gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0),
-    gsSPBranchList(gLinkHumanMirrorShieldDL),
-};
+bool gIsCjLoaded = false;
 
-Gfx gCJRightHandHoldingHeroShieldDL[] = {
-    gsSPDisplayList(gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0),
-    gsSPBranchList(gLinkHumanHerosShieldDL),
-};
+LinkAnimationHeader gVanillaPlayerAnim_link_normal_okarina_start;
+LinkAnimationHeader gVanillaCJSkel_ocarinaGcj_ocarina_swingAnim;
 
-Gfx gCJLeftHandHoldingGildedSwordDL[] = {
-    gsSPDisplayList(gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0),
-    gsSPDisplayList(gLinkHumanGildedSwordHandleDL),
-    gsSPBranchList(gLinkHumanGildedSwordBladeDL),
-};
+void onCjLoad(void *userdata) {
+    gIsCjLoaded = true;
+}
 
-Gfx gCJLeftHandHoldingKokiriSwordDL[] = {
-    gsSPDisplayList(gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0),
-    gsSPBranchList(gKokiriSwordDL),
-};
+void onCjUnload(void *userdata) {
+    *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_start) = gVanillaPlayerAnim_link_normal_okarina_start;
+    *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_swing) = gVanillaCJSkel_ocarinaGcj_ocarina_swingAnim;
+    gIsCjLoaded = false;
+}
 
-Gfx gCJLeftHandHoldingRazorSwordDL[] = {
-    gsSPDisplayList(gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0),
-    gsSPBranchList(gRazorSwordDL),
-};
+RECOMP_CALLBACK("yazmt_mm_playermodelmanager", ZPlayerModels_onRegisterModels)
+void registerCjModels() {
+    gVanillaPlayerAnim_link_normal_okarina_start = *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_start);
+    gVanillaCJSkel_ocarinaGcj_ocarina_swingAnim = *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_swing);
 
-Gfx gCJRightHandShoulderAndForearm[] = {
-    gsSPDisplayList(gCJSkel_bone017_gLinkHumanRightForearmLimb_mesh_layer_Opaque_tri_0),
-    gsSPBranchList(gCJSkel_bone016_gLinkHumanRightShoulderLimb_mesh_layer_Opaque_tri_0),
-};
+    ZPlayerModelHandle h = ZPlayerModel_registerModel(ZPMM_API_VERSION, "playas_cj");
 
-Gfx gCJRightHandHoldingBowDL[] = {
-    gsSPDisplayList(gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0),
-    gsSPBranchList(gLinkHumanBowDL),
-};
+    ZPlayerModel_setDisplayName(h, "CJ");
 
-Gfx gCJRightHandHoldingHookshotDL[] = {
-    gsSPDisplayList(gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0),
-    gsSPBranchList(gLinkHumanHookshotDL),
-};
+    ZPlayerModel_setSkeleton(h, &gCJSkel);
 
-extern PlayerAgeProperties sPlayerAgeProperties[PLAYER_FORM_MAX];
-static PlayerAgeProperties savedAgeProperties[2];
-extern Gfx* gPlayerHandHoldingShields[];
+    ZPlayerModel_setFlags(h, ZPLAYERMODEL_FLAG_MM_ADULT_FIX);
 
-extern LinkAnimationHeader gPlayerAnim_link_normal_okarina_start[];
-extern LinkAnimationHeader gPlayerAnim_link_normal_okarina_swing[];
-extern Input* sPlayerControlInput;
+    ZPlayerModel_setDL(h, ZPM_DL_RFIST, gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0);
+    ZPlayerModel_setDL(h, ZPM_DL_LFIST, gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0);
+    ZPlayerModel_setDL(h, ZPM_DL_LHAND_BOTTLE, gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque);
+    ZPlayerModel_setDL(h, ZPM_DL_FPS_LFOREARM, gCJSkel_bone014_gLinkHumanLeftForearmLimb_mesh_layer_Opaque);
+    ZPlayerModel_setDL(h, ZPM_DL_FPS_LHAND, gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0);
+    ZPlayerModel_setDL(h, ZPM_DL_FPS_RHAND, gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0);
+    ZPlayerModel_setDL(h, ZPM_DL_FPS_RFOREARM, gCJSkel_bone017_gLinkHumanRightForearmLimb_mesh_layer_Opaque);
+
+    ZPlayerModel_setLoadCallback(h, onCjLoad, NULL);
+    ZPlayerModel_setUnloadCallback(h, onCjUnload, NULL);
+}
 
 void updateLink(PlayState* play) {
+    if (!gIsCjLoaded) {
+        return;
+    }
+
     PlayerAgeProperties CJProperties;
     Player* player = GET_PLAYER(play);
     if (player->transformation == PLAYER_FORM_HUMAN) {
@@ -124,53 +90,6 @@ void updateLink(PlayState* play) {
     }
 }
 
-RECOMP_HOOK("Player_Init") void on_Player_Init(Actor* thisx, PlayState* play) {
-    gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gCJSkel;
-    gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_ocarina_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_ocarina_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJRightHandHoldingHookshotDL;
-    gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJRightHandHoldingHookshotDL;
-    
-    gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque;
-
-    gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJRightHandHoldingBowDL;
-    gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJRightHandHoldingBowDL;
-
-    sPlayerFirstPersonLeftForearmDLs[PLAYER_FORM_HUMAN] = gCJSkel_bone014_gLinkHumanLeftForearmLimb_mesh_layer_Opaque_tri_0;
-    sPlayerFirstPersonLeftHandDLs[PLAYER_FORM_HUMAN] = gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0;
-    sPlayerFirstPersonRightShoulderDLs[PLAYER_FORM_HUMAN] = gCJRightHandShoulderAndForearm;
-    sPlayerFirstPersonRightHandDLs[PLAYER_FORM_HUMAN] = gCJSkel_bow_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-    sPlayerFirstPersonRightHandHookshotDLs[PLAYER_FORM_HUMAN] = gCJSkel_hookshot_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque;
-
-
-    gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 0] = gCJSkel_bone001_gLinkHumanWaistLimb_mesh_layer_Opaque;
-    gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 1] = gCJSkel_bone001_gLinkHumanWaistLimb_mesh_layer_Opaque;
-
-    gPlayerHandHoldingShields[0] = gCJRightHandHoldingHeroShieldDL;
-    gPlayerHandHoldingShields[1] = gCJRightHandHoldingHeroShieldDL;
-    gPlayerHandHoldingShields[2] = gCJRightHandHoldingMirrorShieldDL;
-    gPlayerHandHoldingShields[3] = gCJRightHandHoldingMirrorShieldDL;
-
-
-    D_801C018C[0] = gCJLeftHandHoldingKokiriSwordDL;
-    D_801C018C[1] = gCJLeftHandHoldingKokiriSwordDL;
-    D_801C018C[2] = gCJLeftHandHoldingRazorSwordDL;
-    D_801C018C[3] = gCJLeftHandHoldingRazorSwordDL;
-    D_801C018C[4] = gCJLeftHandHoldingGildedSwordDL;
-    D_801C018C[5] = gCJLeftHandHoldingGildedSwordDL;
-}
-
 #define CJ_MASK_SCALE_MODIFIER 0.5f
 #define CJ_MASK_DOWNWARDS_OFFSET -10.f
 #define CJ_MASK_FORWARDS_OFSSEET 350.f
@@ -179,6 +98,10 @@ u8 gPushedMatrix;
 extern Gfx* D_801C0B20[];
 extern LinkAnimationHeader gPlayerAnim_cl_setmask;
 RECOMP_HOOK("Player_PostLimbDrawGameplay") void on_Player_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList1, Gfx** dList2, Vec3s* rot, Actor* actor) {
+    if (!gIsCjLoaded) {
+        return;
+    }
+    
     Player* player = (Player*)actor;
     if (limbIndex == PLAYER_LIMB_HEAD) {
         if (((*dList1 != NULL) && ((u32)player->currentMask != PLAYER_MASK_NONE)) &&
@@ -210,50 +133,23 @@ RECOMP_HOOK_RETURN("Player_PostLimbDrawGameplay") void return_Player_PostLimbDra
     gPushedMatrix = 0;
 }
 
-typedef struct BunnyEarKinematics {
-    /* 0x0 */ Vec3s rot;
-    /* 0x6 */ Vec3s angVel;
-} BunnyEarKinematics; // size = 0xC
-
-extern BunnyEarKinematics sBunnyEarKinematics;
-
-RECOMP_PATCH void Player_DrawBunnyHood(PlayState* play) {
-    Mtx* mtx = GRAPH_ALLOC(play->state.gfxCtx, 2 * sizeof(Mtx));
-    Vec3s earRot;
-
-    OPEN_DISPS(play->state.gfxCtx);
-
-    gSPSegment(POLY_OPA_DISP++, 0x0B, mtx);
-
-    Matrix_Push();
-
-    earRot.x = sBunnyEarKinematics.rot.y + 0x3E2;
-    earRot.y = sBunnyEarKinematics.rot.z + 0xDBE;
-    earRot.z = sBunnyEarKinematics.rot.x - 0x348A;
-    Matrix_SetTranslateRotateYXZ(97.0f + CJ_MASK_DOWNWARDS_OFFSET, -1203.0f - CJ_MASK_DOWNWARDS_OFFSET, -240.0f, &earRot);
-    Matrix_Scale(CJ_MASK_SCALE_MODIFIER, CJ_MASK_SCALE_MODIFIER, CJ_MASK_SCALE_MODIFIER, MTXMODE_APPLY);
-
-    Matrix_ToMtx(mtx++);
-
-    earRot.x = sBunnyEarKinematics.rot.y - 0x3E2;
-    earRot.y = -sBunnyEarKinematics.rot.z - 0xDBE;
-    earRot.z = sBunnyEarKinematics.rot.x - 0x348A;
-    Matrix_SetTranslateRotateYXZ(97.0f + CJ_MASK_DOWNWARDS_OFFSET, -1203.0f - CJ_MASK_DOWNWARDS_OFFSET, 240.0f, &earRot);
-    Matrix_Scale(CJ_MASK_SCALE_MODIFIER, CJ_MASK_SCALE_MODIFIER, CJ_MASK_SCALE_MODIFIER, MTXMODE_APPLY);
-
-    Matrix_ToMtx(mtx);
-
-    Matrix_Pop();
-
-    CLOSE_DISPS(play->state.gfxCtx);
-}
 extern FlexSkeletonHeader gHappyMaskSalesmanSkel;
 RECOMP_HOOK("EnOsn_Init") void on_EnOsn_Init(Actor* thisx, PlayState* play) {
-    *(FlexSkeletonHeader*)Lib_SegmentedToVirtual(&gHappyMaskSalesmanSkel) = gBigSmokeSkel;
+    if (!gIsCjLoaded) {
+        return;
+    }
 
+    *(FlexSkeletonHeader*)Lib_SegmentedToVirtual(&gHappyMaskSalesmanSkel) = gBigSmokeSkel;
 }
 
+int gIsEnOsnMatrixPushed = 0;
+
 RECOMP_HOOK ("EnOsn_Draw") void on_EnOsn_Draw(Actor* thisx, PlayState* play) {
+    if (!gIsCjLoaded) {
+        return;
+    }
+
+    gIsEnOsnMatrixPushed = 1;
     OPEN_DISPS(play->state.gfxCtx);
     Matrix_Push();
     Matrix_Translate(0.f, 1000.f, 0.f, MTXMODE_APPLY);
@@ -262,25 +158,17 @@ RECOMP_HOOK ("EnOsn_Draw") void on_EnOsn_Draw(Actor* thisx, PlayState* play) {
 }
 
 RECOMP_HOOK_RETURN ("EnOsn_Draw") void return_EnOsn_Draw(Actor* thisx, PlayState* play) {
-    Matrix_Pop();
-}
-
-Player *gOriginalPlayer;
-u8 gOriginalPlayerTransformation;
-
-RECOMP_HOOK ("Player_GetHeight") void on_Player_GetHeight(Player* player) {
-    gOriginalPlayer = player;
-    gOriginalPlayerTransformation = player->transformation;
-    if (player->transformation == PLAYER_FORM_HUMAN) {
-        player->transformation = PLAYER_FORM_ZORA;
+    if (gIsEnOsnMatrixPushed) {
+        Matrix_Pop();
     }
-}
-
-RECOMP_HOOK_RETURN ("Player_GetHeight") void return_Player_GetHeight(void) {
-    gOriginalPlayer->transformation = gOriginalPlayerTransformation;
+    gIsEnOsnMatrixPushed = 0;
 }
 
 RECOMP_CALLBACK("*", recomp_on_play_main)
 void mainUpdate(PlayState* play) {
+    if (!gIsCjLoaded) {
+        return;
+    }
+
     updateLink(play);
 }
