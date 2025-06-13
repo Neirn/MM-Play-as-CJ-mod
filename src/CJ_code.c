@@ -22,31 +22,33 @@ extern Gfx gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque
 
 bool gIsCjLoaded = false;
 
-LinkAnimationHeader gVanillaPlayerAnim_link_normal_okarina_start;
-LinkAnimationHeader gVanillaCJSkel_ocarinaGcj_ocarina_swingAnim;
+extern s16 gPlayerAnim_link_normal_okarina_start_Data[];
+extern s16 gPlayerAnim_link_normal_okarina_swing_Data[];
+
+LinkAnimationHeader gVanillaPlayerAnim_link_normal_okarina_start = {
+    {12}, gPlayerAnim_link_normal_okarina_start_Data};
+
+LinkAnimationHeader gVanillaPlayerAnim_link_normal_okarina_swing = {
+    {68}, gPlayerAnim_link_normal_okarina_swing_Data};
 
 void onCjLoad(void *userdata) {
     gIsCjLoaded = true;
 }
 
 void onCjUnload(void *userdata) {
-    *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_start) = gVanillaPlayerAnim_link_normal_okarina_start;
-    *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_swing) = gVanillaCJSkel_ocarinaGcj_ocarina_swingAnim;
     gIsCjLoaded = false;
 }
 
 RECOMP_CALLBACK("yazmt_mm_playermodelmanager", ZPlayerModels_onRegisterModels)
 void registerCjModels() {
-    gVanillaPlayerAnim_link_normal_okarina_start = *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_start);
-    gVanillaCJSkel_ocarinaGcj_ocarina_swingAnim = *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_swing);
 
-    ZPlayerModelHandle h = ZPlayerModel_registerModel(ZPMM_API_VERSION, "playas_cj");
+    ZPlayerModelHandle h = ZPLAYERMODEL_REGISTER_PLAYER_MODEL("playas_cj", ZPM_MODEL_TYPE_ADULT);
 
     ZPlayerModel_setDisplayName(h, "CJ");
 
-    ZPlayerModel_setSkeleton(h, &gCJSkel);
+    ZPlayerModel_setAuthor(h, "Reonu");
 
-    ZPlayerModel_setFlags(h, ZPLAYERMODEL_FLAG_MM_ADULT_FIX);
+    ZPlayerModel_setSkeleton(h, &gCJSkel);
 
     ZPlayerModel_setDL(h, ZPM_DL_RFIST, gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0);
     ZPlayerModel_setDL(h, ZPM_DL_LFIST, gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0);
@@ -60,8 +62,13 @@ void registerCjModels() {
     ZPlayerModel_setUnloadCallback(h, onCjUnload, NULL);
 }
 
+bool isVanillaOcarinaSaved = false;
+bool isCjAnims = false;
+
 void updateLink(PlayState* play) {
     if (!gIsCjLoaded) {
+        *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_start) = gVanillaPlayerAnim_link_normal_okarina_start;
+        *(LinkAnimationHeader *)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_swing) = gVanillaPlayerAnim_link_normal_okarina_swing;
         return;
     }
 
@@ -87,6 +94,7 @@ void updateLink(PlayState* play) {
         player->ageProperties = &sPlayerAgeProperties[PLAYER_FORM_HUMAN];
         *(LinkAnimationHeader*)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_start) = gCJSkel_ocarinaGcj_ocarina_startAnim;
         *(LinkAnimationHeader*)Lib_SegmentedToVirtual(&gPlayerAnim_link_normal_okarina_swing) = gCJSkel_ocarinaGcj_ocarina_swingAnim;
+        isCjAnims = true;
     }
 }
 
@@ -166,9 +174,5 @@ RECOMP_HOOK_RETURN ("EnOsn_Draw") void return_EnOsn_Draw(Actor* thisx, PlayState
 
 RECOMP_CALLBACK("*", recomp_on_play_main)
 void mainUpdate(PlayState* play) {
-    if (!gIsCjLoaded) {
-        return;
-    }
-
     updateLink(play);
 }
