@@ -39,27 +39,27 @@ void onCjUnload(void *userdata) {
     gIsCjLoaded = false;
 }
 
-RECOMP_CALLBACK("yazmt_mm_playermodelmanager", ZPlayerModels_onRegisterModels)
+PLAYERMODELMANAGER_CALLBACK_REGISTER_MODELS
 void registerCjModels() {
 
-    ZPlayerModelHandle h = ZPLAYERMODEL_REGISTER_PLAYER_MODEL("playas_cj", ZPM_MODEL_TYPE_ADULT);
+    PlayerModelManagerHandle h = PLAYERMODELMANAGER_REGISTER_MODEL("playas_cj", PMM_MODEL_TYPE_ADULT);
 
-    ZPlayerModel_setDisplayName(h, "CJ");
+    PlayerModelManager_setDisplayName(h, "CJ");
 
-    ZPlayerModel_setAuthor(h, "Reonu");
+    PlayerModelManager_setAuthor(h, "Reonu");
 
-    ZPlayerModel_setSkeleton(h, &gCJSkel);
+    PlayerModelManager_setSkeleton(h, &gCJSkel);
 
-    ZPlayerModel_setDL(h, ZPM_DL_RFIST, gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0);
-    ZPlayerModel_setDL(h, ZPM_DL_LFIST, gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0);
-    ZPlayerModel_setDL(h, ZPM_DL_LHAND_BOTTLE, gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque);
-    ZPlayerModel_setDL(h, ZPM_DL_FPS_LFOREARM, gCJSkel_bone014_gLinkHumanLeftForearmLimb_mesh_layer_Opaque);
-    ZPlayerModel_setDL(h, ZPM_DL_FPS_LHAND, gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0);
-    ZPlayerModel_setDL(h, ZPM_DL_FPS_RHAND, gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0);
-    ZPlayerModel_setDL(h, ZPM_DL_FPS_RFOREARM, gCJSkel_bone017_gLinkHumanRightForearmLimb_mesh_layer_Opaque);
+    PlayerModelManager_setDisplayList(h, PMM_DL_RFIST, gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0);
+    PlayerModelManager_setDisplayList(h, PMM_DL_LFIST, gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0);
+    PlayerModelManager_setDisplayList(h, PMM_DL_LHAND_BOTTLE, gCJSkel_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque);
+    PlayerModelManager_setDisplayList(h, PMM_DL_FPS_LFOREARM, gCJSkel_bone014_gLinkHumanLeftForearmLimb_mesh_layer_Opaque);
+    PlayerModelManager_setDisplayList(h, PMM_DL_FPS_LHAND, gCJSkel_handsclosed_bone015_gLinkHumanLeftHandLimb_mesh_layer_Opaque_tri_0);
+    PlayerModelManager_setDisplayList(h, PMM_DL_FPS_RHAND, gCJSkel_handsclosed_bone018_gLinkHumanRightHandLimb_mesh_layer_Opaque_tri_0);
+    PlayerModelManager_setDisplayList(h, PMM_DL_FPS_RFOREARM, gCJSkel_bone017_gLinkHumanRightForearmLimb_mesh_layer_Opaque);
 
-    ZPlayerModel_setLoadCallback(h, onCjLoad, NULL);
-    ZPlayerModel_setUnloadCallback(h, onCjUnload, NULL);
+    //PlayerModelManager_setLoadCallback(h, onCjLoad, NULL);
+    //PlayerModelManager_setUnloadCallback(h, onCjUnload, NULL);
 }
 
 bool isVanillaOcarinaSaved = false;
